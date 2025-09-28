@@ -1,7 +1,7 @@
 package org.example.backend.Service;
 
 
-import org.example.backend.DTO.GroupRequest;
+import org.example.backend.DTO.GroupDTO;
 import org.example.backend.models.StudyGroup;
 import org.example.backend.repo.StudyGroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +19,9 @@ public class StudyGroupService {
     @Autowired
     private StudyGroupRepository studyGroupRepository;
 
-    public List<String> validation(GroupRequest groupRequest){
-        String title = groupRequest.getTitle().trim();
-        Integer course = groupRequest.getCourse();
+    public List<String> validation(GroupDTO groupDTO){
+        String title = groupDTO.getTitle().trim();
+        Integer course = groupDTO.getCourse();
         List<String> errors = new ArrayList<>();
         if (title == null || title.isEmpty()) {
             errors.add("Название группы не может быть пустым");
@@ -38,9 +38,9 @@ public class StudyGroupService {
 
 
 
-    public void saveStudyGroup(GroupRequest groupRequest){
-        String title = groupRequest.getTitle().trim();
-        int course = groupRequest.getCourse();
+    public void saveStudyGroup(GroupDTO groupDTO){
+        String title = groupDTO.getTitle().trim();
+        int course = groupDTO.getCourse();
 
         StudyGroup group = new StudyGroup(title, course);
         studyGroupRepository.save(group);

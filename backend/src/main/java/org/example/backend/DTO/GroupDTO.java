@@ -1,13 +1,13 @@
 package org.example.backend.DTO;
 
-public class GroupRequest {
+public class GroupDTO {
     private String title;
     private int course;
 
     // Конструкторы, геттеры и сеттеры
-    public GroupRequest() {}
+    public GroupDTO() {}
 
-    public GroupRequest(String title, int course) {
+    public GroupDTO(String title, int course) {
         this.title = title;
         this.course = course;
     }

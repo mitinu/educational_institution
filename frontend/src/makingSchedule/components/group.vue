@@ -4,7 +4,7 @@
       <span>{{ group.title }}</span>
     </div>
     <couple
-      v-for="(couple, idx) in group.couples"
+      v-for="(couple, idx) in group.schedule"
       :key="idx"
       :couple="couple"
       class="couple-row"

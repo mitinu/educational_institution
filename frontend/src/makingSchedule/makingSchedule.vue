@@ -41,8 +41,8 @@ export default {
     emitChange(){
       this.ifChange = true
     },
-    selectWeek(weekDays) {
-      fetch('/api/getGroups')
+    async selectWeek(weekDays) {
+      await fetch('/api/getGroups')
       .then(res=>{return res.json()})
       .then(data=>{
         const groups = data
@@ -61,10 +61,10 @@ export default {
                 course.days[day].groups[group.title] = {
                   id: group.id,
                   title: group.title,
-                  couples:{}
+                  schedule:{}
                 }
                 for (let i = 1; i < 7; i++) {
-                  course.days[day].groups[group.title].couples[i] = {
+                  course.days[day].groups[group.title].schedule[i] = {
                     academicSubject: "",
                     professor: "",
                     office: "",
@@ -88,17 +88,22 @@ export default {
         return response.json();
       })
       .then(data => {
-        const schedules = data.schedules
-        console.log(schedules)
+        const couples = data
+        console.log(couples)
         console.log(this.courses)
-        for (const scheduleKey in schedules) {
-          const schedule = schedules[scheduleKey]
-          const group = schedule.studyGroup
-          const thisGroup = this.courses[group.course].days[schedule.date].groups[group.title]
+        for (const coupleKey in couples) {
+          const couple = couples[coupleKey]
+          const thisGroup = this.courses[couple.course].days[couple.date].groups[couple.titleStudyGroup]
+          thisGroup.schedule.id = couple.idSchedule
           for (let i = 1; i < 7; i++) {
-            thisGroup.couples.id = schedule.id
 
-            thisGroup.couples = schedule.listCouple
+            thisGroup.schedule[couple.number] = {
+              academicSubject: couple.academicSubject,
+              professor: couple.professor,
+              office: couple.office,
+              id: couple.idCouple,
+              number: couple.number
+            }
           }
 
         }
@@ -106,32 +111,40 @@ export default {
     },
     SaveSchedule(){
 
-      const schedules = []
+      const couples = []
       for (const courseKey in this.courses) {
         const course = this.courses[courseKey]
         for (const dayKey in course.days) {
           const day = course.days[dayKey]
           for (const groupKey in day.groups) {
             const group = day.groups[groupKey];
-            const couples = []
             for (let i = 1; i < 7; i++) {
-              couples.push(group.couples[i])
+              const couple = group.schedule[i]
+              couples.push({
+                course: course.number,
+                date: day.date,
+                idStudyGroup: group.id,
+                idSchedule: group.schedule.id,
+
+                idCouple: couple.id,
+                academicSubject: couple.academicSubject,
+                professor: couple.professor,
+                office: couple.office,
+                studyGroup: group.title,
+                number: couple.number,
+              });
             }
-            schedules.push({
-              date: day.date,
-              idGroup: group.id,
-              id: group.couples.id,
-              couplesRequest: couples
-            });
+
           }
         }
       }
+      console.log(couples)
       fetch('/api/setSchedule',{
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(schedules)
+        body: JSON.stringify(couples)
       })
     }
   },

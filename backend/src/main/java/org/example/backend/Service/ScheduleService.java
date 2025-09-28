@@ -1,7 +1,6 @@
 package org.example.backend.Service;
 
-import org.example.backend.DTO.CoupleRequest;
-import org.example.backend.DTO.SchedulesRequest;
+import org.example.backend.DTO.CoupleDTO;
 import org.example.backend.models.Couple;
 import org.example.backend.models.Schedule;
 import org.example.backend.models.StudyGroup;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -30,55 +28,66 @@ public class ScheduleService {
     private StudyGroupRepository studyGroupRepository;
 
 
-    public void saveSchedule(List<SchedulesRequest> scheduleRequests) {
-        for (SchedulesRequest request : scheduleRequests) {
-            if (request.getId() == null) {
-                createNewSchedule(request);
+
+    public void saveSchedule(List<CoupleDTO> couplesDTO) {
+        for (CoupleDTO coupleDTO : couplesDTO) {
+            StudyGroup studyGroup = studyGroupRepository.findById(coupleDTO.getIdStudyGroup())
+                    .orElseThrow(() -> new EntityNotFoundException("StudyGroup not found"));
+
+
+            if (coupleDTO.getIdSchedule() == null) {
+                scheduleRepository.findByStudyGroupAndDate(studyGroup, coupleDTO.getDate())
+                    .orElseGet(() ->{
+                        return createNewSchedule(coupleDTO, studyGroup);
+                    });
+
+            }
+
+
+            if (coupleDTO.getIdCouple() == null) {
+                createNewCouple(coupleDTO, studyGroup);
             } else {
-                updateExistingSchedule(request);
+                updateExistingCouple(coupleDTO);
             }
         }
     }
-    private void createNewSchedule(SchedulesRequest request) {
-
-        StudyGroup studyGroup = studyGroupRepository.findById(request.getIdGroup())
-                .orElseThrow(() -> new EntityNotFoundException("StudyGroup not found"));
-
-        List<Couple> couples = createCouplesFromRequest(request.getCouplesRequest());
-        coupleRepository.saveAll(couples);
-
-        Schedule schedule = new Schedule(couples, request.getDate(), studyGroup);
-        scheduleRepository.save(schedule);
+    private Schedule createNewSchedule(CoupleDTO coupleDTO, StudyGroup studyGroup) {
+            Schedule schedule = new Schedule(coupleDTO.getDate(), studyGroup);
+            return scheduleRepository.save(schedule);
     }
-    private void updateExistingSchedule(SchedulesRequest request) {
-        Schedule existingSchedule = scheduleRepository.findById(request.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Schedule not found"));
 
-        List<Couple> existingCouples = existingSchedule.getListCouple();
-        List<CoupleRequest> newCoupleRequests = request.getCouplesRequest();
-
-        for (int i = 0; i < 6; i++) {
-            Couple existingCouple = existingCouples.get(i);
-            CoupleRequest newRequest = newCoupleRequests.get(i);
-            System.out.println(existingCouple.getOffice() +"\t"+ newRequest.getOffice());
-            existingCouple.setOffice(newRequest.getOffice() != null?newRequest.getOffice():"");
-            existingCouple.setAcademicSubject(newRequest.getAcademicSubject() != null?newRequest.getAcademicSubject():"");
-            existingCouple.setProfessor(newRequest.getProfessor() != null?newRequest.getProfessor():"");
+    private void createNewCouple(CoupleDTO coupleDTO, StudyGroup studyGroup) {
+        Schedule schedule;
+        if (coupleDTO.getIdSchedule() == null){
+            schedule = scheduleRepository.findByStudyGroupAndDate(studyGroup, coupleDTO.getDate())
+                    .orElseThrow(() -> new EntityNotFoundException("Schedule not found"));
+        }
+        else {
+            schedule = scheduleRepository.findById(coupleDTO.getIdSchedule())
+                    .orElseThrow(() -> new EntityNotFoundException("Schedule not found"));
         }
 
-        coupleRepository.saveAll(existingCouples);
-    }
-    private List<Couple> createCouplesFromRequest(List<CoupleRequest> couplesRequest) {
-        List<Couple> couples = new ArrayList<>();
-        for (CoupleRequest couplerequest : couplesRequest) {
 
-            couples.add(new Couple(
-                    couplerequest.getOffice() != null?couplerequest.getOffice():"",
-                    couplerequest.getAcademicSubject() != null?couplerequest.getAcademicSubject():"",
-                    couplerequest.getProfessor() != null?couplerequest.getProfessor():""
-            ));
-        }
 
-        return couples;
+        Couple couple = new Couple(
+                coupleDTO.getOffice() != null?coupleDTO.getOffice():"",
+                coupleDTO.getAcademicSubject() != null?coupleDTO.getAcademicSubject():"",
+                coupleDTO.getProfessor() != null?coupleDTO.getProfessor():"",
+                studyGroup.getTitle(),
+                schedule,
+                coupleDTO.getNumber()
+        );
+        coupleRepository.save(couple);
+
     }
+    private void updateExistingCouple(CoupleDTO coupleDTO) {
+        Couple Couple = coupleRepository.findById(coupleDTO.getIdCouple())
+                .orElseThrow(() -> new EntityNotFoundException("Couple not found"));
+
+        Couple.setOffice(coupleDTO.getOffice() != null?coupleDTO.getOffice():"");
+        Couple.setAcademicSubject(coupleDTO.getAcademicSubject() != null?coupleDTO.getAcademicSubject():"");
+        Couple.setProfessor(coupleDTO.getProfessor() != null?coupleDTO.getProfessor():"");
+        coupleRepository.save(Couple);
+    }
+
 }

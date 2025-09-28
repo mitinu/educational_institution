@@ -53,10 +53,9 @@ export default {
           const scedule = data[sceduleKey]
           this.scedules[sceduleKey] = {
             date: scedule.date,
-            couples: scedule.listCouple
+            couples: scedule.couples
           }
         }
-        console.log()
       })
       // testData = {
       //   scedules: {
