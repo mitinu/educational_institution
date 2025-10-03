@@ -10,7 +10,7 @@
     />
     <visualization
       v-if="selectGroupId"
-      :scedules="scedules"
+      :schedules="schedules"
       class="schedule-visualization"
     />
   </div>
@@ -29,15 +29,14 @@ export default {
   data() {
     return {
       groups: [],
-      scedules: [],
+      schedules: [],
       selectGroupId: null
     }
   },
   created() {
-    fetch('/api/getGroups')
-    .then(res=>{return res.json()})
-    .then(data=>{
-      this.groups = data
+    this.$api.getGroups()
+    .then(res=>{
+      this.groups = res.data
     })
   },
   methods: {
@@ -45,15 +44,14 @@ export default {
       let testData;
       console.log(id)
       this.selectGroupId = id
-      fetch(`/api/getScedulesGroup/${id}`)
-      .then(res=>{return res.json()})
-      .then(data=>{
-        console.log(data)
-        for (const sceduleKey in data) {
-          const scedule = data[sceduleKey]
-          this.scedules[sceduleKey] = {
-            date: scedule.date,
-            couples: scedule.couples
+      this.$api.getSchedulesGroup(id)
+      .then(res=>{
+        console.log(res.data)
+        for (const scheduleKey in res.data) {
+          const schedule = res.data[scheduleKey]
+          this.schedules[scheduleKey] = {
+            date: schedule.date,
+            couples: schedule.couples
           }
         }
       })

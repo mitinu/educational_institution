@@ -14,8 +14,7 @@ public class ScheduleDTO {
     private LocalDate date;
     private List<Couple> couples;
 
-    public ScheduleDTO() {
-    }
+    public ScheduleDTO() {}
 
     public ScheduleDTO(Schedule schedule, List<Couple> couples) {
         this.id = schedule.getId();

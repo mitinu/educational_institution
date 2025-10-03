@@ -2,13 +2,13 @@
 <template>
   <div class="visualization-container">
     <div
-      v-for="(scedule, idx) in scedules"
+      v-for="(schedule, idx) in schedules"
       :key="idx"
       class="day-card"
     >
       <day
-        :couples="scedule.couples"
-        :date="scedule.date"
+        :couples="schedule.couples"
+        :date="schedule.date"
         class="day-content"
       />
     </div>
@@ -24,13 +24,13 @@ export default {
     day
   },
   props: {
-    scedules: {
+    schedules: {
       type: Object,
       required: true
     }
   },
   created() {
-    console.log(this.scedules)
+    console.log(this.schedules)
   }
 }
 </script>

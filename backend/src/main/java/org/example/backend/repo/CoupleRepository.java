@@ -9,6 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CoupleRepository extends CrudRepository<Couple, Long> {
-    List<Couple> findBySchedule_Date(LocalDate date);
+    Optional<List<Couple>> findBySchedule_Date(LocalDate date);
     Optional<List<Couple>> findBySchedule(Schedule schedule);
 }

@@ -42,10 +42,9 @@ export default {
       this.ifChange = true
     },
     async selectWeek(weekDays) {
-      await fetch('/api/getGroups')
-      .then(res=>{return res.json()})
-      .then(data=>{
-        const groups = data
+      await this.$api.getGroups()
+      .then(res=>{
+        const groups = res.data
         for (const courseKey in this.courses) {
           const course = this.courses[courseKey]
           course.days = {}
@@ -77,18 +76,10 @@ export default {
           }
         }
       })
-      fetch('/api/getSchedule',{
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(weekDays)
-      })
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        const couples = data
+      .catch(e => console.error('Ошибка:', e))
+      this.$api.getSchedule(weekDays)
+      .then(res => {
+        const couples = res.data
         console.log(couples)
         console.log(this.courses)
         for (const coupleKey in couples) {
@@ -108,9 +99,9 @@ export default {
 
         }
       })
+      .catch(e => console.error('Ошибка:', e))
     },
     SaveSchedule(){
-
       const couples = []
       for (const courseKey in this.courses) {
         const course = this.courses[courseKey]
@@ -139,13 +130,10 @@ export default {
         }
       }
       console.log(couples)
-      fetch('/api/setSchedule',{
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(couples)
-      })
+
+      this.$api.setSchedule(couples)
+      .then(res => console.log('Успех:', res))
+      .catch(e => console.error('Ошибка:', e))
     }
   },
 
