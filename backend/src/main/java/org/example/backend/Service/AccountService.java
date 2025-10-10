@@ -21,7 +21,6 @@ public class AccountService {
 
     public List<String> validation(AccountDTO accountDTO){
         List<String> errors = new ArrayList<>();
-
         String fullName = accountDTO.getFullName().trim();
         short accessLevel = accountDTO.getAccessLevel();
 

@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -92,9 +93,10 @@ public class RestApiController {
 
         }
         catch (EntityNotFoundException e){
-            status = 400;
-            message = "неиндифицированная ошибка";
-            response = new Response<EntityNotFoundException>(status, message, e);
+            status = 500;
+            message = "ошибка сервера";
+            System.out.println(e.getMessage());
+            response = new Response<EntityNotFoundException>(status, message, null);
         }
 
         return ResponseEntity.status(status).body(response);
@@ -142,9 +144,10 @@ public class RestApiController {
             return ResponseEntity.status(status).body(response);
         }
         catch (EntityNotFoundException e){
-            status = 400;
-            message = "error";//TODO идифицировать ошибку
-            Response<EntityNotFoundException> response = new Response<EntityNotFoundException>(status, message, e);
+            status = 500;
+            message = "ошибка сервера";
+            System.out.println(e.getMessage());
+            Response<EntityNotFoundException> response = new Response<EntityNotFoundException>(status, message, null);
 
             return ResponseEntity.status(status).body(response);
         }
@@ -197,4 +200,54 @@ public class RestApiController {
 
         return ResponseEntity.status(status).body(response);
     }
+
+
+    @GetMapping("/deleteGroup/{groupId}")
+    public ResponseEntity<?> deleteGroup(@PathVariable String groupId) {
+        short status = 200;
+        String message = "группа удалена";
+        try {
+            Optional<StudyGroup> group = studyGroupRepository.findById(Long.parseLong(groupId));
+
+            if (group.isPresent()) {
+                studyGroupRepository.deleteById(Long.parseLong(groupId));
+            } else {
+                status = 404;
+                message = "группа не найдена";
+            }
+        }
+        catch (EntityNotFoundException e){
+            status = 500;
+            message = "ошибка сервера";
+            System.out.println(e.getMessage());
+        }
+
+        Response<Object> response = new Response<Object>(status, message, null);
+
+        return ResponseEntity.status(status).body(response);
+    }
+    @GetMapping("/deleteAccount/{accountId}")
+    public ResponseEntity<?> deleteAccount(@PathVariable String accountId   ) {
+        short status = 200;
+        String message = "аккаунт удалена";
+        try {
+            Optional<Account> account = accountRepository.findById(Long.parseLong(accountId));
+
+            if (account.isPresent()) {
+                accountRepository.deleteById(Long.parseLong(accountId));
+            } else {
+                status = 404;
+                message = "аккаунт не найдена";
+            }
+        }
+        catch (EntityNotFoundException e){
+            status = 500;
+            message = "ошибка сервера";
+            System.out.println(e.getMessage());
+        }
+
+        Response<Object> response = new Response<Object>(status, message, null);
+        return ResponseEntity.status(status).body(response);
+    }
+
 }
