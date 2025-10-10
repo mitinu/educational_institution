@@ -18,7 +18,7 @@
           class="input-number"
       >
       <button
-          @click="addAccount"
+          @click.stop="addAccount"
           :disabled="!isFormValid"
           class="add-button"
       >
@@ -28,15 +28,19 @@
 
 
     <button
-        @click.stop="viewModel(), getAccount()"
+        @click.stop="getAccounts"
         class="view-all-button"
     >
       Посмотреть все учетные записи
     </button>
     <list-modal
-        v-if="visibilityModel"
-        @closeModal="closeModal"
-        @refreshData="getAccount"
+      v-if="visibilityModel"
+      title="Список учетных записей"
+      :dataTable="accounts"
+      :columns="columns"
+      @closeModal="closeModal"
+      @update="getAccounts"
+      @deleteItem="deleteAccount"
     />
 
 
@@ -55,7 +59,33 @@ export default {
     return {
       fullName: '',
       accessLevel: 1,
-      account: []
+      accounts: [],
+      columns: [
+        {
+          title: 'ID',
+          key: 'id',
+          resizable: true,
+          fr: "100fr"
+        },
+        {
+          title: 'полное имя',
+          key: 'fullName',
+          resizable: true,
+          fr: "100fr"
+        },
+        {
+          title: 'уровень доступа',
+          key: 'accessLevel',
+          resizable: true,
+          fr: "100fr"
+        },
+        {
+          title: 'Действия',
+          key: 'buttonDelete',
+          resizable: false,
+          fr: "100fr"
+        }
+      ]
     }
   },
   computed: {
@@ -64,11 +94,12 @@ export default {
     }
   },
   methods: {
-    getAccount() {
-      this.$api.getAccount()
+    getAccounts() {
+      this.$api.getAccounts()
         .then(res => {
           console.log(res)
-          this.account = res.data
+          this.accounts = res.data
+          this.viewModel()
         })
         .catch(e => console.error('Ошибка:', e))
     },
@@ -80,10 +111,20 @@ export default {
         fullName: this.fullName,
         accessLevel: this.accessLevel
       })
-      .then(res => console.log('Успех:', res))
+      .then(res => {
+        console.log('Успех:', res)
+        this.getAccounts()
+      })
+      .catch(e => console.error('Ошибка:', e))
+    },
+    deleteAccount(id){
+      this.$api.deleteAccount(id)
+      .then(res => {
+        console.log('Успех:', res)
+        this.getAccounts()
+      })
       .catch(e => console.error('Ошибка:', e))
     }
-
   }
 }
 </script>
@@ -159,3 +200,6 @@ h6 {
   background-color: #218838;
 }
 </style>
+
+<script setup lang="ts">
+</script>

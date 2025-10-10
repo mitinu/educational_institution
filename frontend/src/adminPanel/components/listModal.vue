@@ -8,33 +8,40 @@
       class="modal-header"
       @mousedown="startDrag"
       @touchstart="startDrag"
-
     >
-      <h3>Список групп</h3>
+      <h3>{{title}}</h3>
       <button class="close-button" @click.stop="closeModal">×</button>
     </div>
 
     <div class="modal-body">
-      <button class="refresh-button" @click="refreshData">Обновить</button>
 
-      <ul class="groups-list">
-        <li v-for="group in groups" :key="group.id" class="group-item">
-          <span class="group-info">{{ group.title }} ({{ group.course }} курс)</span>
-          <button class="delete-button" @click="deleteGroup(group.id)">×</button>
-        </li>
-      </ul>
+      <myTable
+        :columns="columns"
+        :dataTable="dataTable"
+        @deleteItem="deleteItem"
+      >
+      </myTable>
+      <button class="update-button" @click.stop="update">Обновить</button>
     </div>
   </div>
 </template>
 
 <script>
 import moveDiv from "@/mixins/moveDiv.vue";
+import myTable from "./myTable.vue";
+import listItemAccount from "./listItemAccount.vue";
 
 export default {
   name: 'listModal',
   mixins: [moveDiv],
+  components: {
+    myTable,
+    listItemAccount
+  },
   props: {
-    value: {type: Array,default: () => []},
+    title: {type: String, default: "Список"},
+    dataTable: {type: Array, default: []},
+    columns: {type: Array, default: []}
   },
   methods: {
     clickModal(event) {
@@ -45,20 +52,12 @@ export default {
     closeModal() {
       this.$emit('closeModal');
     },
-    refreshData() {
-      this.$emit('refreshData');
-    },
+    deleteItem(id){
+      this.$emit("deleteItem", id)
 
-    deleteGroup(groupId) {
-      // Логика удаления группы
-      console.log('Удаление группы:', groupId);
-      // Здесь должен быть API запрос для удаления группы
-      // this.$api.deleteGroup(groupId).then(() => this.refreshGroups());
     },
-
-    loadGroups() {
-      // Пример загрузки групп
-      // this.$api.getGroups().then(groups => this.groups = groups);
+    update() {
+      this.$emit("update")
     }
   },
 
@@ -66,8 +65,9 @@ export default {
 </script>
 
 <style scoped>
-
 .modal-content {
+  display: grid;
+  grid-template-rows: 15% 85%;
   position: fixed;
   background: white;
   border-radius: 8px;
@@ -122,62 +122,22 @@ export default {
 
 .modal-body {
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Важно для корректного скролла */
 }
 
-.refresh-button {
+.update-button {
   padding: 8px 16px;
   background-color: #007bff;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  margin-bottom: 20px;
 }
 
-.refresh-button:hover {
+.update-button:hover {
   background-color: #0056b3;
 }
 
-.groups-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.group-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  border: 1px solid #eee;
-  border-radius: 4px;
-  margin-bottom: 8px;
-  background-color: #fafafa;
-}
-
-.group-item:hover {
-  background-color: #f0f0f0;
-}
-
-.group-info {
-  font-size: 14px;
-  color: #333;
-}
-
-.delete-button {
-  background: none;
-  border: none;
-  color: #dc3545;
-  font-size: 18px;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-
-.delete-button:hover {
-  background-color: #dc3545;
-  color: white;
-}
 </style>

@@ -18,7 +18,7 @@
         class="input-number"
       >
       <button
-        @click="addGroup"
+        @click.stop="addGroup"
         :disabled="!isFormValid"
         class="add-button"
       >
@@ -27,19 +27,22 @@
     </div>
 
     <button
-      @click.stop="viewModel(), getGroups()"
+      @click.stop="getGroups"
       class="view-all-button"
     >
       Посмотреть все группы
     </button>
     <list-modal
       v-if="visibilityModel"
+      title="Список групп"
+      :dataTable="groups"
+      :columns="columns"
       @closeModal="closeModal"
-      @refreshData="getGroups"
+      @update="getGroups"
+      @deleteItem="deleteGroup"
     />
   </div>
 </template>
-
 <script>
 import listModal from "./listModal.vue";
 import funcModal from "../mixins/funcModal.vue";
@@ -52,7 +55,33 @@ export default {
     return {
       group: '',
       course: 1,
-      groups: []
+      groups: [],
+      columns: [
+        {
+          title: 'ID',
+          key: 'id',
+          resizable: true,
+          fr: "100fr"
+        },
+        {
+          title: 'Название',
+          key: 'title',
+          resizable: true,
+          fr: "100fr"
+        },
+        {
+          title: 'Курс',
+          key: 'course',
+          resizable: true,
+          fr: "100fr"
+        },
+        {
+          title: 'Действия',
+          key: 'buttonDelete',
+          resizable: false,
+          fr: "100fr"
+        }
+      ]
     }
   },
   computed: {
@@ -61,11 +90,13 @@ export default {
     }
   },
   methods: {
+
     getGroups(){
       this.$api.getGroups()
       .then(res => {
         console.log(res)
         this.groups = res.data
+        this.viewModel()
       })
       .catch(e => console.error('Ошибка:', e))
     },
@@ -79,8 +110,19 @@ export default {
         title: this.group,
         course: this.course
       })
-      .then(res => console.log('Успех:', res))
+      .then(res => {
+        console.log('Успех:', res)
+        this.getGroups()
+      })
       .catch(e => console.error('Ошибка:', e))
+    },
+    deleteGroup(id){
+      this.$api.deleteGroup(id)
+        .then(res => {
+          console.log('Успех:', res)
+          this.getGroups()
+        })
+        .catch(e => console.error('Ошибка:', e))
     }
   }
 }
