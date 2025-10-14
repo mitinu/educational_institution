@@ -52,7 +52,8 @@ export default {
   },
   data(){
     return {
-      minFr: 70
+      minFr: 70,
+      isResizing: false
     }
   },
   computed: {
@@ -75,6 +76,7 @@ export default {
     deleteItem(id){
       this.$emit('deleteItem', id)
     },
+
     positiveUpdateColumn(columnsFr, index, changeFr) {
       let newFr = columnsFr[index] + changeFr;
       const remainsFr = newFr - this.minFr

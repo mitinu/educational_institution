@@ -46,7 +46,7 @@ export default {
   methods: {
     clickModal(event) {
       if (event.currentTarget.style.zIndex<this.$store.state.zIndexMax){
-        event.currentTarget.style.zIndex=++this.$store.state.zIndexMax
+        event.currentTarget.style.zIndex=this.$store.state.zIndexMax+1
       }
     },
     closeModal() {
@@ -77,7 +77,8 @@ export default {
   overflow: hidden;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   z-index: 9;
-
+  min-height: 200px;
+  min-width: min-content;
   resize: auto;
 }
 
